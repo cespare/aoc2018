@@ -30,17 +30,15 @@ func (ctx *problemContext) problem4() {
 	sleep := make(map[int]*sleepRecord)
 
 	var sr *sleepRecord
-	id := -1
 	var start time.Time
 	for _, gr := range records {
 		switch gr.action {
 		case actionBeginShift:
-			id = gr.guardID
 			var ok bool
-			sr, ok = sleep[id]
+			sr, ok = sleep[gr.guardID]
 			if !ok {
 				sr = new(sleepRecord)
-				sleep[id] = sr
+				sleep[gr.guardID] = sr
 			}
 		case actionFallAsleep:
 			if sr == nil {
@@ -114,6 +112,7 @@ func parseGuardRecord(s string) (*guardRecord, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	gr := &guardRecord{t: t}
 	switch parts[1] {
 	case "falls asleep":
