@@ -2,80 +2,54 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 func (ctx *problemContext) problem3() {
-	g := newGrid(1000, 1000)
-
+	var ids []string
+	var colSet, rowSet intervalSet
 	scanner := bufio.NewScanner(ctx.f)
 	for scanner.Scan() {
 		c, err := parseClaim(scanner.Text())
 		if err != nil {
 			log.Fatalf("Bad claim %q: %s", scanner.Text(), err)
 		}
-		g.addClaim(c)
+		idx := len(ids)
+		ids = append(ids, c.id)
+		colSet.addClaim(idx, c.x, c.w)
+		rowSet.addClaim(idx, c.y, c.h)
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(g.count2())
-	fmt.Println(g.findNoOverlaps())
+	colSet.sort()
+	rowSet.sort()
 }
 
-type grid struct {
-	cells    [][]string
-	overlaps map[string]bool
-	width    int
-	height   int
+type intervalSet struct {
+	starts pointSet
+	ends   pointSet
 }
 
-func newGrid(width, height int) *grid {
-	return &grid{
-		cells:    make([][]string, width*height),
-		overlaps: make(map[string]bool),
-		width:    width,
-		height:   height,
-	}
+func (iset *intervalSet) addClaim(idx, start, delta int) {
+	iset.starts = append(iset.starts, [2]int{idx, start})
+	iset.ends = append(iset.ends, [2]int{idx, start + delta})
 }
 
-func (g *grid) addClaim(c *claim) {
-	for x := c.x; x < c.x+c.w; x++ {
-		for y := c.y; y < c.y+c.h; y++ {
-			i := y*g.width + x
-			for _, id := range g.cells[i] {
-				g.overlaps[id] = true
-			}
-			if !g.overlaps[c.id] {
-				g.overlaps[c.id] = len(g.cells[i]) > 0
-			}
-			g.cells[i] = append(g.cells[i], c.id)
-		}
-	}
+func (iset *intervalSet) sort() {
+	sort.Sort(iset.starts)
+	sort.Sort(iset.ends)
 }
 
-func (g *grid) count2() int {
-	var total int
-	for _, ids := range g.cells {
-		if len(ids) >= 2 {
-			total++
-		}
-	}
-	return total
-}
+type pointSet [][2]int
 
-func (g *grid) findNoOverlaps() string {
-	for id, overlaps := range g.overlaps {
-		if !overlaps {
-			return id
-		}
-	}
-	return ""
-}
+func (s pointSet) Len() int           { return len(s) }
+func (s pointSet) Less(i, j int) bool { return s[i][1] < s[j][1] }
+func (s pointSet) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 type claim struct {
 	id   string
