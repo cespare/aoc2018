@@ -12,6 +12,7 @@ var funcs = []func(*problemContext){
 	(*problemContext).problem2,
 	(*problemContext).problem3,
 	(*problemContext).problem4,
+	(*problemContext).problem5,
 }
 
 func main() {
