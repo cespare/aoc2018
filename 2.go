@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"unicode/utf8"
 )
@@ -26,7 +25,7 @@ func (ctx *problemContext) problem2() {
 			threeTimes++
 		}
 	}
-	fmt.Println(twoTimes * threeTimes)
+	ctx.l.Println(twoTimes * threeTimes)
 
 	seen := make(map[string]struct{})
 	for _, id := range ids {
@@ -34,7 +33,7 @@ func (ctx *problemContext) problem2() {
 			w := utf8.RuneLen(r)
 			s := id[:i] + "?" + id[i+w:]
 			if _, ok := seen[s]; ok {
-				fmt.Println(id[:i] + id[i+w:])
+				ctx.l.Println(id[:i] + id[i+w:])
 				return
 			}
 			seen[s] = struct{}{}

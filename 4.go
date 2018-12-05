@@ -76,7 +76,7 @@ func (ctx *problemContext) problem4() {
 			maxSleeper = sr
 		}
 	}
-	fmt.Println(part1)
+	ctx.l.Println(part1)
 
 	var part2 int
 	var max int64
@@ -88,7 +88,7 @@ func (ctx *problemContext) problem4() {
 			}
 		}
 	}
-	fmt.Println(part2)
+	ctx.l.Println(part2)
 }
 
 type guardAction int

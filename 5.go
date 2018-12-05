@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 )
@@ -14,7 +13,8 @@ func (ctx *problemContext) problem5() {
 	}
 	p = bytes.TrimSpace(p)
 
-	fmt.Println(reducedPolymerLen(p))
+	p0 := append([]byte(nil), p...)
+	ctx.l.Println(reducedPolymerLen(p0))
 
 	seen := make(map[byte]struct{})
 	min := len(p)
@@ -24,16 +24,16 @@ func (ctx *problemContext) problem5() {
 			continue
 		}
 		seen[c] = struct{}{}
-		n := reducedPolymerLen(removePolymer(p, c))
+		n := reducedPolymerLen(removePolymer(p, c, p0))
 		if n < min {
 			min = n
 		}
 	}
-	fmt.Println(min)
+	ctx.l.Println(min)
 }
 
-func removePolymer(p []byte, c byte) []byte {
-	p0 := make([]byte, len(p))
+func removePolymer(p []byte, c byte, p0 []byte) []byte {
+	p0 = p0[:len(p)]
 	i := 0
 	for _, c1 := range p {
 		if toLower(c1) != c {
@@ -45,27 +45,20 @@ func removePolymer(p []byte, c byte) []byte {
 }
 
 func reducedPolymerLen(p []byte) int {
-	p0 := append([]byte(nil), p...)
+	i, j := 0, 1
 	for {
-		n := len(p0)
-		p0 = reducePolymer1(p0)
-		if len(p0) == n {
-			return len(p0)
-		}
-	}
-}
-
-func reducePolymer1(p []byte) []byte {
-	i := 0
-	for j := 0; j < len(p); j++ {
-		if j < len(p)-1 && letterPairs[p[j]] == p[j+1] {
+		for i >= 0 && j < len(p) && letterPairs[p[i]] == p[j] {
+			i--
 			j++
-		} else {
-			p[i] = p[j]
-			i++
 		}
+		if j == len(p) {
+			return i + 1
+		}
+		i++
+		p[i] = p[j]
+		j++
+
 	}
-	return p[:i]
 }
 
 func toLower(c byte) byte {

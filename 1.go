@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"strconv"
 )
@@ -25,13 +24,13 @@ func (ctx *problemContext) problem1() {
 	for _, d := range deltas {
 		total += d
 	}
-	fmt.Println(total)
+	ctx.l.Println(total)
 
 	var freq int64
 	seen := make(map[int64]struct{})
 	for i := 0; ; i = (i + 1) % len(deltas) {
 		if _, ok := seen[freq]; ok {
-			fmt.Println(freq)
+			ctx.l.Println(freq)
 			return
 		}
 		seen[freq] = struct{}{}

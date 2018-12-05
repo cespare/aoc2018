@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -23,8 +22,8 @@ func (ctx *problemContext) problem3() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(g.count2())
-	fmt.Println(g.findNoOverlaps())
+	ctx.l.Println(g.count2())
+	ctx.l.Println(g.findNoOverlaps())
 }
 
 type grid struct {
