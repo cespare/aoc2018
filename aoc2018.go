@@ -17,6 +17,7 @@ var funcs = []func(*problemContext){
 	(*problemContext).problem3,
 	(*problemContext).problem4,
 	(*problemContext).problem5,
+	(*problemContext).problem6,
 }
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 	if *printTiming && *cpuProfile != "" {
 		log.Fatal("-t and -cpuprofile are incompatible")
 	}
-	if flag.NArg() != 1 {
+	if flag.NArg() < 1 {
 		log.Fatal("Usage: aoc2018 [flags] <problem>")
 	}
 	n, err := strconv.Atoi(flag.Arg(0))
@@ -86,7 +87,7 @@ func newProblemContext(n int) (*problemContext, error) {
 	ctx := &problemContext{
 		l: log.New(os.Stdout, "", 0),
 	}
-	if len(os.Args) > 2 && os.Args[2] == "-" {
+	if flag.NArg() > 1 && flag.Arg(1) == "-" {
 		ctx.f = os.Stdin
 	} else {
 		name := fmt.Sprintf("%d.txt", n)
