@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+func init() {
+	addSolutions(6, (*problemContext).problem6)
+}
+
 func (ctx *problemContext) problem6() {
 	var points []point
 	scanner := bufio.NewScanner(ctx.f)
@@ -20,6 +24,7 @@ func (ctx *problemContext) problem6() {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+	ctx.reportLoad()
 
 	xmin := points[0].x
 	xmax := xmin
@@ -89,7 +94,7 @@ func (ctx *problemContext) problem6() {
 			max = a
 		}
 	}
-	ctx.l.Println(max)
+	ctx.reportPart1(max)
 
 	for i := range grid {
 		grid[i] = 0
@@ -110,7 +115,7 @@ func (ctx *problemContext) problem6() {
 			}
 		}
 	}
-	ctx.l.Println(n)
+	ctx.reportPart2(n)
 }
 
 type point struct {

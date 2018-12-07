@@ -8,40 +8,67 @@ import (
 	"os"
 	"runtime/pprof"
 	"strconv"
+	"strings"
 	"time"
 )
 
-var funcs = []func(*problemContext){
-	(*problemContext).problem1,
-	(*problemContext).problem2,
-	(*problemContext).problem3,
-	(*problemContext).problem4,
-	(*problemContext).problem5,
-	(*problemContext).problem6,
+var solutions = make(map[int][]func(*problemContext))
+
+func addSolutions(problem int, fns ...func(*problemContext)) {
+	solutions[problem] = append(solutions[problem], fns...)
+}
+
+func findSolution(problem, solNumber int) (func(*problemContext), error) {
+	solns, ok := solutions[problem]
+	if !ok {
+		return nil, fmt.Errorf("no solutions for problem %d", problem)
+	}
+	if solNumber > len(solns) {
+		return nil, fmt.Errorf("problem %d only has %d solution(s)", problem, len(solns))
+	}
+	return solns[solNumber-1], nil
+}
+
+func parseProblem(name string) (problem, solNumber int, err error) {
+	parts := strings.SplitN(name, ".", 2)
+	solNumber = 1
+	if len(parts) == 2 {
+		var err error
+		solNumber, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return 0, 0, err
+		}
+	}
+	problem, err = strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, 0, err
+	}
+	return problem, solNumber, nil
 }
 
 func main() {
 	log.SetFlags(0)
 
 	cpuProfile := flag.String("cpuprofile", "", "write CPU profile to `file`")
-	printTiming := flag.Bool("t", false, "print elapsed time")
+	printTimings := flag.Bool("t", false, "print timings")
+	readStdin := flag.Bool("stdin", false, "read from stdin instead of default file")
 	flag.Parse()
 
-	if *printTiming && *cpuProfile != "" {
+	if *printTimings && *cpuProfile != "" {
 		log.Fatal("-t and -cpuprofile are incompatible")
 	}
-	if flag.NArg() < 1 {
-		log.Fatal("Usage: aoc2018 [flags] <problem>")
+	if flag.NArg() != 1 {
+		log.Fatalf("Usage: %s [flags] problem", os.Args[0])
 	}
-	n, err := strconv.Atoi(flag.Arg(0))
+	problem, solNumber, err := parseProblem(flag.Arg(0))
 	if err != nil {
-		log.Fatalln("Bad problem number", flag.Arg(0))
+		log.Fatalln("Bad problem number:", err)
 	}
-	if n < 1 || n > len(funcs) {
-		log.Fatalln("Bad problem number:", n)
+	fn, err := findSolution(problem, solNumber)
+	if err != nil {
+		log.Fatal(err)
 	}
-	fn := funcs[n-1]
-	ctx, err := newProblemContext(n)
+	ctx, err := newProblemContext(problem, *readStdin)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,12 +95,14 @@ func main() {
 		for time.Until(end) > 0 {
 			fn(ctx)
 		}
+		return
 	}
 
-	start := time.Now()
+	ctx.timings.start = time.Now()
 	fn(ctx)
-	if *printTiming {
-		ctx.l.Println("Elapsed:", time.Since(start))
+	ctx.timings.done = time.Now()
+	if *printTimings {
+		ctx.printTimings()
 	}
 }
 
@@ -81,13 +110,50 @@ type problemContext struct {
 	f         *os.File
 	needClose bool
 	l         *log.Logger
+
+	timings struct {
+		start time.Time
+		load  time.Time
+		part1 time.Time
+		part2 time.Time
+		done  time.Time
+	}
 }
 
-func newProblemContext(n int) (*problemContext, error) {
+func (ctx *problemContext) reportLoad() { ctx.timings.load = time.Now() }
+
+func (ctx *problemContext) reportPart1(v interface{}) {
+	ctx.timings.part1 = time.Now()
+	ctx.l.Println("Part 1:", v)
+}
+
+func (ctx *problemContext) reportPart2(v interface{}) {
+	ctx.timings.part2 = time.Now()
+	ctx.l.Println("Part 2:", v)
+}
+
+func (ctx *problemContext) printTimings() {
+	ctx.l.Println("Total:", ctx.timings.done.Sub(ctx.timings.start))
+	t := ctx.timings.start
+	if !ctx.timings.load.IsZero() {
+		ctx.l.Println("  Load:", ctx.timings.load.Sub(t))
+		t = ctx.timings.load
+	}
+	if !ctx.timings.part1.IsZero() {
+		ctx.l.Println("  Part 1:", ctx.timings.part1.Sub(t))
+		t = ctx.timings.part1
+	}
+	if !ctx.timings.part2.IsZero() {
+		ctx.l.Println("  Part 2:", ctx.timings.part2.Sub(t))
+		t = ctx.timings.part2
+	}
+}
+
+func newProblemContext(n int, readStdin bool) (*problemContext, error) {
 	ctx := &problemContext{
 		l: log.New(os.Stdout, "", 0),
 	}
-	if flag.NArg() > 1 && flag.Arg(1) == "-" {
+	if readStdin {
 		ctx.f = os.Stdin
 	} else {
 		name := fmt.Sprintf("%d.txt", n)

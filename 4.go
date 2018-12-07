@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+func init() {
+	addSolutions(4, (*problemContext).problem4)
+}
+
 func (ctx *problemContext) problem4() {
 	var records []*guardRecord
 	scanner := bufio.NewScanner(ctx.f)
@@ -23,6 +27,7 @@ func (ctx *problemContext) problem4() {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+	ctx.reportLoad()
 	sort.Slice(records, func(i, j int) bool {
 		return records[i].t.Before(records[j].t)
 	})
@@ -76,7 +81,7 @@ func (ctx *problemContext) problem4() {
 			maxSleeper = sr
 		}
 	}
-	ctx.l.Println(part1)
+	ctx.reportPart1(part1)
 
 	var part2 int
 	var max int64
@@ -88,7 +93,7 @@ func (ctx *problemContext) problem4() {
 			}
 		}
 	}
-	ctx.l.Println(part2)
+	ctx.reportPart2(part2)
 }
 
 type guardAction int

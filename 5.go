@@ -6,15 +6,20 @@ import (
 	"log"
 )
 
+func init() {
+	addSolutions(5, (*problemContext).problem5)
+}
+
 func (ctx *problemContext) problem5() {
 	p, err := ioutil.ReadAll(ctx.f)
 	if err != nil {
 		log.Fatal(err)
 	}
+	ctx.reportLoad()
 	p = bytes.TrimSpace(p)
 
 	p0 := append([]byte(nil), p...)
-	ctx.l.Println(reducedPolymerLen(p0))
+	ctx.reportPart1(reducedPolymerLen(p0))
 
 	seen := make(map[byte]struct{})
 	min := len(p)
@@ -29,7 +34,7 @@ func (ctx *problemContext) problem5() {
 			min = n
 		}
 	}
-	ctx.l.Println(min)
+	ctx.reportPart2(min)
 }
 
 func removePolymer(p []byte, c byte, p0 []byte) []byte {
@@ -57,7 +62,6 @@ func reducedPolymerLen(p []byte) int {
 		i++
 		p[i] = p[j]
 		j++
-
 	}
 }
 

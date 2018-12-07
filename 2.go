@@ -6,6 +6,10 @@ import (
 	"unicode/utf8"
 )
 
+func init() {
+	addSolutions(2, (*problemContext).problem2)
+}
+
 func (ctx *problemContext) problem2() {
 	var ids []string
 	scanner := bufio.NewScanner(ctx.f)
@@ -15,6 +19,7 @@ func (ctx *problemContext) problem2() {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+	ctx.reportLoad()
 
 	var twoTimes, threeTimes int64
 	for _, id := range ids {
@@ -25,7 +30,7 @@ func (ctx *problemContext) problem2() {
 			threeTimes++
 		}
 	}
-	ctx.l.Println(twoTimes * threeTimes)
+	ctx.reportPart1(twoTimes * threeTimes)
 
 	seen := make(map[string]struct{})
 	for _, id := range ids {
@@ -33,7 +38,7 @@ func (ctx *problemContext) problem2() {
 			w := utf8.RuneLen(r)
 			s := id[:i] + "?" + id[i+w:]
 			if _, ok := seen[s]; ok {
-				ctx.l.Println(id[:i] + id[i+w:])
+				ctx.reportPart2(id[:i] + id[i+w:])
 				return
 			}
 			seen[s] = struct{}{}
