@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"log"
 	"strconv"
+
+	"github.com/kr/pretty"
 )
 
 func init() {
@@ -29,6 +31,7 @@ func (ctx *problemContext) problem8() {
 	if len(rem) > 0 {
 		panic("input too long")
 	}
+	pretty.Println(tree)
 	ctx.reportPart1(tree.sumMetadata())
 	ctx.reportPart2(tree.value())
 }
@@ -40,20 +43,17 @@ type node struct {
 }
 
 func parseNode(s []int64) (*node, []int64) {
+	numMetadata := s[1]
 	n := &node{
 		children: make([]*node, s[0]),
-		metadata: make([]int64, s[1]),
 		val:      -1,
 	}
 	s = s[2:]
 	for i := range n.children {
 		n.children[i], s = parseNode(s)
 	}
-	for i := range n.metadata {
-		n.metadata[i] = s[0]
-		s = s[1:]
-	}
-	return n, s
+	n.metadata = s[:numMetadata]
+	return n, s[numMetadata:]
 }
 
 func (n *node) sumMetadata() int64 {
@@ -72,15 +72,16 @@ func (n *node) value() int64 {
 		return n.val
 	}
 	if len(n.children) == 0 {
-		return n.sumMetadata()
+		n.val = n.sumMetadata()
+		return n.val
 	}
-	var total int64
+	n.val = 0
 	for _, i := range n.metadata {
 		i--
 		if i >= int64(len(n.children)) {
 			continue
 		}
-		total += n.children[i].value()
+		n.val += n.children[i].value()
 	}
-	return total
+	return n.val
 }
