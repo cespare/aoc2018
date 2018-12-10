@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"log"
 	"strconv"
-
-	"github.com/kr/pretty"
 )
 
 func init() {
@@ -31,7 +29,6 @@ func (ctx *problemContext) problem8() {
 	if len(rem) > 0 {
 		panic("input too long")
 	}
-	pretty.Println(tree)
 	ctx.reportPart1(tree.sumMetadata())
 	ctx.reportPart2(tree.value())
 }
