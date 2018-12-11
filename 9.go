@@ -39,9 +39,11 @@ func (ctx *problemContext) problem9() {
 	}
 	ctx.reportPart1(g.highScore())
 
-	g = newMarbleGame(numPlayers)
-	for i := 0; i < end*100; i++ {
-		g.step()
+	for ctx.loopForProfile() {
+		g = newMarbleGame(numPlayers)
+		for i := 0; i < end*100; i++ {
+			g.step()
+		}
 	}
 	ctx.reportPart2(g.highScore())
 }
@@ -76,7 +78,10 @@ func (g *marbleGame) step() bool {
 	} else {
 		g.current = g.current.right().insertRight(id)
 	}
-	g.curPlayer = (g.curPlayer + 1) % len(g.points)
+	g.curPlayer++
+	if g.curPlayer == len(g.points) {
+		g.curPlayer = 0
+	}
 	return !done
 }
 

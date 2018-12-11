@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"runtime/pprof"
@@ -89,12 +88,8 @@ func main() {
 		}
 		defer pprof.StopCPUProfile()
 
-		ctx.l = log.New(ioutil.Discard, "", 0)
-
-		end := time.Now().Add(5 * time.Second)
-		for time.Until(end) > 0 {
-			fn(ctx)
-		}
+		ctx.profiling = true
+		fn(ctx)
 		return
 	}
 
@@ -107,9 +102,11 @@ func main() {
 }
 
 type problemContext struct {
-	f         *os.File
-	needClose bool
-	l         *log.Logger
+	f            *os.File
+	needClose    bool
+	profiling    bool
+	profileStart time.Time
+	l            *log.Logger
 
 	timings struct {
 		start time.Time
@@ -171,4 +168,15 @@ func (ctx *problemContext) close() {
 	if ctx.needClose {
 		ctx.f.Close()
 	}
+}
+
+func (ctx *problemContext) loopForProfile() bool {
+	if ctx.profileStart.IsZero() {
+		ctx.profileStart = time.Now()
+		return true
+	}
+	if !ctx.profiling {
+		return false
+	}
+	return time.Since(ctx.profileStart) < 5*time.Second
 }
