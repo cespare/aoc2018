@@ -119,14 +119,16 @@ type problemContext struct {
 
 func (ctx *problemContext) reportLoad() { ctx.timings.load = time.Now() }
 
-func (ctx *problemContext) reportPart1(v interface{}) {
+func (ctx *problemContext) reportPart1(v ...interface{}) {
 	ctx.timings.part1 = time.Now()
-	ctx.l.Println("Part 1:", v)
+	args := append([]interface{}{"Part 1:"}, v...)
+	ctx.l.Println(args...)
 }
 
-func (ctx *problemContext) reportPart2(v interface{}) {
+func (ctx *problemContext) reportPart2(v ...interface{}) {
 	ctx.timings.part2 = time.Now()
-	ctx.l.Println("Part 2:", v)
+	args := append([]interface{}{"Part 2:"}, v...)
+	ctx.l.Println(args...)
 }
 
 func (ctx *problemContext) printTimings() {
