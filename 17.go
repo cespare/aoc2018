@@ -40,7 +40,9 @@ func (ctx *problemContext) problem17() {
 	}
 
 	scan := newEarthScan(clay)
+	//scan.debug = true
 	scan.fill()
+	//fmt.Println(scan)
 	ctx.reportPart1(scan.countWater())
 	ctx.reportPart2(scan.countStillWater())
 }
@@ -144,14 +146,21 @@ func (s *earthScan) fill() {
 	s.fillDown(v)
 }
 
+func (s *earthScan) occupied(v ivec2) bool {
+	if s.clay.contains(v) {
+		return true
+	}
+	return s.water[v] == '~'
+}
+
 func (s *earthScan) fillDown(v ivec2) (contained bool) {
 	if s.debug {
 		fmt.Printf("fillDown(%v)\n%s\n", v, s)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	orig := v
-	for !s.clay.contains(v) {
+	for !s.occupied(v) {
 		if s.water[v] == '|' {
 			return false
 		}
@@ -161,9 +170,9 @@ func (s *earthScan) fillDown(v ivec2) (contained bool) {
 			return false
 		}
 	}
-	for ; v != orig; v.y-- {
-		containedLeft := s.fillLeftRight(v, ivec2{-1, 0})
-		containedRight := s.fillLeftRight(v, ivec2{1, 0})
+	for v.y--; v.y >= orig.y; v.y-- {
+		containedLeft := s.fillLeftRight(v, -1)
+		containedRight := s.fillLeftRight(v, 1)
 		if !containedLeft || !containedRight {
 			return false
 		}
@@ -172,30 +181,29 @@ func (s *earthScan) fillDown(v ivec2) (contained bool) {
 	return true
 }
 
-func (s *earthScan) fillLeftRight(v, d ivec2) (contained bool) {
+func (s *earthScan) fillLeftRight(v ivec2, d int) (contained bool) {
 	if s.debug {
 		fmt.Printf("fillLeftRight(%v, %v)\n%s\n", v, d, s)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	for !s.clay.contains(v) {
-		below := v.below()
-		if !s.clay.contains(below) && s.water[below] != '~' {
+		if !s.occupied(ivec2{v.x, v.y + 1}) {
 			if !s.fillDown(v) {
 				return false
 			}
 		}
 		s.water[v] = '|'
-		v = v.add(d)
+		v.x += d
 	}
 	return true
 }
 
 func (s *earthScan) makeStill(v ivec2) {
-	for vl := v; !s.clay.contains(vl); vl = vl.left() {
+	for vl := v; !s.clay.contains(vl); vl.x-- {
 		s.water[vl] = '~'
 	}
-	for vr := v; !s.clay.contains(vr); vr = vr.right() {
+	for vr := v; !s.clay.contains(vr); vr.x++ {
 		s.water[vr] = '~'
 	}
 }
@@ -213,8 +221,3 @@ func (s *earthScan) countStillWater() int {
 	}
 	return total
 }
-
-func (v ivec2) add(d ivec2) ivec2 { return ivec2{v.x + d.x, v.y + d.y} }
-func (v ivec2) left() ivec2       { return ivec2{v.x - 1, v.y} }
-func (v ivec2) right() ivec2      { return ivec2{v.x + 1, v.y} }
-func (v ivec2) below() ivec2      { return ivec2{v.x, v.y + 1} }
