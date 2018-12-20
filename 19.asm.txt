@@ -1,0 +1,40 @@
+0 1 2 3 4 5
+x p y q z
+
+
+00 jmp 16               goto 17
+01 y = 1                y = 1
+02 p = 1                p = 1
+03 z = y * p            z = y * p
+04 z = z == q ? 1 : 0   if z == q { z = 1; x += y } else { z = 0 }
+05 jmp +z               *
+06 jmp 07               *
+07 x += y               *
+08 p++                  p++
+09 z = p > q ? 1 : 0    if p > q { z = 1 } else { z = 0; goto 03 }
+10 jmp +z               *
+11 jmp 02               *
+12 y++                  y++
+13 z = y > q ? 1 : 0    if y > q { z = 1 } else { z = 0; goto 02 }
+14 jmp +z               *
+15 jmp 01               *
+16 jmp 256              halt
+17 q += 2               q += 2
+18 q = q*q              q = q*q
+19 q *= 19              q *= 19
+20 q *= 11              q *= 11
+21 z += 6               z += 6
+22 z *= 22              z *= 22
+23 z += 5               z += 5
+24 q += z               q += z
+25 jmp +x               switch x { case 0: goto 01 } { case 1: } { default: ??? }
+26 jmp 00               *
+27 z = 27               z = 27
+28 z *= 28              z *= 28
+29 z += 29              z += 29
+30 z *= 30              z *= 30
+31 z *= 14              z *= 14
+32 z *= 32              z *= 32
+33 q += z               q += z
+34 x = 0                x = 0
+35 jmp 0                goto 01

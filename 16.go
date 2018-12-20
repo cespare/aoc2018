@@ -291,11 +291,7 @@ func (r registers) eqri(a, b, c int) registers {
 }
 
 func (r registers) eqrr(a, b, c int) registers {
-	if r[a] == r[b] {
-		r[c] = 1
-	} else {
-		r[c] = 0
-	}
+	r[c] = boolToInt(r[a] == r[b])
 	return r
 }
 
