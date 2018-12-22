@@ -182,3 +182,10 @@ func (ctx *problemContext) loopForProfile() bool {
 	}
 	return time.Since(ctx.profileStart) < 5*time.Second
 }
+
+func abs(n int64) int64 {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
