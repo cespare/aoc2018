@@ -44,17 +44,19 @@ func (ctx *problemContext) problem24() {
 	_, units := b1.result()
 	ctx.reportPart1(units)
 
-	for boost := int64(1); ; boost++ {
-		b2 := battle.copy()
-		b2.boost(boost)
-		for b2.step() {
+	for ctx.loopForProfile() {
+		for boost := int64(1); ; boost++ {
+			b2 := battle.copy()
+			b2.boost(boost)
+			for b2.step() {
+			}
+			immuneWon, units := b2.result()
+			if !immuneWon {
+				continue
+			}
+			ctx.reportPart2(units)
+			break
 		}
-		immuneWon, units := b2.result()
-		if !immuneWon {
-			continue
-		}
-		ctx.reportPart2(units)
-		break
 	}
 }
 
